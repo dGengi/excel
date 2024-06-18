@@ -38,7 +38,8 @@ class Spreadsheet:
             for j in range(rowMin, rowMax+1):
                 try:
                     cell=self.cells[cits(i)][j]
-                    L.append(cell)
+                    if cell.value is not None:
+                        L.append(cell)
                 except:
                     pass
         
