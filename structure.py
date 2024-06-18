@@ -11,7 +11,7 @@ class Spreadsheet:
     def __init__(self, width: int, height: int):
         self.width = width
         self.height = height
-        cells: dict[dict[Cell]] = {}
+        self.cells: dict[dict[Cell]] = {}
     
     def generate_cell(self, col: str, row: int, value: any | None = None):
         cell = Cell(col, row, value)
@@ -44,3 +44,14 @@ class Spreadsheet:
                     pass
         
         return L
+    
+    def importCSV(self, file_location: str):
+        self.cells = {}
+        with open(file_location, "r") as f:
+            lines = f.read().split("\n")
+            for i in range(len(lines)):
+                line = lines[i].split(",")
+                for j in range(len(line)):
+                    if line[j] != "":
+                        self.cells[cits(j+1)][i+1] = Cell(cits(j+1), i+1, line[j])
+    
