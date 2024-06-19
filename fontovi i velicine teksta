@@ -40,3 +40,48 @@ font_button.pack(pady=10)
 
 root.mainloop()
 
+
+
+
+
+
+
+
+import tkinter as tk
+from tkinter import *
+from matplotlib import font_manager
+
+
+root = tk.Tk()
+root.geometry("100x600")
+
+# probni tekst
+text_label=Label(root,text="skskfkf",font=16)
+text_label.pack()
+def promena_velicine(velicina,ime_teksta):
+    
+    ime_teksta.config(font=velicina)
+
+def lista_velicina(ime_teksta):
+    # ovo je napravljeno za scrolanje niz fontove
+    canvas = Canvas(root)
+    frame = Frame(canvas)
+    scrollbar = Scrollbar(root, orient="vertical", command=canvas.yview)
+    canvas.configure(yscrollcommand=scrollbar.set)
+    scrollbar.pack(side="right", fill="y")
+    canvas.pack(side="left", fill="both", expand=True)
+    canvas.create_window((0, 0), window=frame, anchor="nw")
+    frame.bind("<Configure>", lambda event, canvas=canvas: canvas.configure(scrollregion=canvas.bbox("all")))
+
+    for i in range(1,72):
+        myButton = Button(frame, text=i, command=lambda f=i: promena_velicine(f,ime_teksta))
+        myButton.pack()
+
+#ime_teksta se unosi pa se onda menja font
+ime_teksta=text_label
+
+# dugme za otvaranje liste velicina
+font_button = Button(root, text="promena velicine", command=lista_velicina(ime_teksta))
+font_button.pack(pady=10)
+
+root.mainloop()
