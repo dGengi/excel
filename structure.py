@@ -10,9 +10,7 @@ class Cell:
         self.value = value
 
 class Spreadsheet:
-    def __init__(self, width: int, height: int):
-        self.width = width
-        self.height = height
+    def __init__(self):
         self.cells: dict[dict[Cell]] = {}
     
     def generate_cell(self, col: str, row: int, value):
@@ -76,20 +74,12 @@ class Spreadsheet:
             keys.sort()
             length = keys[-1]
             height = 0
-            #self.cells = {k: self.cells[k] for k in keys}
-            #l = len(self.cells)
-            #k=0
-            #i=1
-            #while k<l:
             matrix = []
             pk = 0
             for k in keys:
                 for i in range(pk+1, k):
                     matrix.append([])
                 l = []
-                #int_columns = []
-                #for col in self.cells[k]:
-                #    int_columns.append(csti(col))
                 keys2=sorted(self.cells[cits(k)])
                 if keys2[-1] > height:
                     height = keys2[-1]
@@ -103,27 +93,3 @@ class Spreadsheet:
             matrixInv = invert(matrix, length, height)
             for row in matrixInv:
                 csvwriter.writerow(row)
-            
-            #zavrsi ovo sranje
-                    
-
-
-    
-tabela = Spreadsheet(4, 4)
-
-tabela.importCSV("tabela neka.csv")
-tabela.generate_cell("A", 2, 1233)
-tabela.remove_cell("D", 4)
-for i in range(4):
-    for j in range(4):
-        try:
-            print(tabela.cells[cits(j+1)][i+1].value, end=' ')
-        except KeyError:
-            print("/", end=' ')
-    print()
-
-tabela.exportCSV("export test.csv")
-
-
-# nova_matrica[i][j] = stara_matrica[j][i]
-
