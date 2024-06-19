@@ -60,7 +60,7 @@ text_label=Label(root,text="skskfkf",font=16)
 text_label.pack()
 def promena_velicine(velicina,ime_teksta):
     
-    ime_teksta.config(font=velicina)
+    ime_teksta.config(font=("Arial",velicina))
 
 def lista_velicina(ime_teksta):
     # ovo je napravljeno za scrolanje niz fontove
@@ -85,3 +85,4 @@ font_button = Button(root, text="promena velicine", command=lista_velicina(ime_t
 font_button.pack(pady=10)
 
 root.mainloop()
+
