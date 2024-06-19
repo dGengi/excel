@@ -1,7 +1,9 @@
 import tkinter as tk
+from tkinter import filedialog
+import csv
 
 class SpreadsheetApp:
-    def __init__(self, root, rows=10, columns=5):
+    def __init__(self, root, rows=15, columns=10):
         self.root = root
         self.root.title("Spreadsheet")
         self.text_content = ""
@@ -22,37 +24,40 @@ class SpreadsheetApp:
         self.root.bind("<Button-1>", self.start_drag)
         self.root.bind("<ButtonRelease-1>", self.end_drag)
 
+        self.update_window_position()
+
+    def update_window_position(self):
+        self.window_x = self.root.winfo_rootx()
+        self.window_y = self.root.winfo_rooty()
+         #   print(f"Window position: x={self.window_x}, y={self.window_y}")
+        self.root.after(100, self.update_window_position)  
+
     def start_drag(self, event):
-        
         self.start_x = event.x_root
         self.start_y = event.y_root
-        print(self.start_x)
-        if self.start_y>31.2*((self.rows+1) or self.start_x>90*(self.columns+1)):
+        print(self.start_x,self.start_y)
+        if self.start_y - self.window_y > 26 + 24.7 * (self.rows ) or self.start_x - self.window_x> 86 * (self.columns)+45 or self.start_x - self.window_x < 45 or self.start_y - self.window_y<26:
             return
         self.deselect_all_cells()
 
     def end_drag(self, event):
         self.end_x = event.x_root
         self.end_y = event.y_root
-        if self.start_y>31.2*((self.rows+1) or self.start_x>90*(self.columns+1)):
+        if self.start_y - self.window_y > 26 + 24.7 * (self.rows ) or self.start_x - self.window_x> 86 * (self.columns)+45 or self.start_x - self.window_x < 45 or self.start_y - self.window_y<26:
             return
         if self.start_x == self.end_x and self.start_y == self.end_y:
             self.single_click_select()
         else:
-             self.select_cells_in_rectangle(self.start_x, self.start_y, self.end_x, self.end_y)
+            self.select_cells_in_rectangle(self.start_x, self.start_y, self.end_x, self.end_y)
 
     def create_widgets(self):
-        # Create labels for columns (A, B, C, ...)
         for col in range(self.columns):
             label = tk.Label(self.root, text=chr(65 + col), relief=tk.RIDGE, width=10)
             label.grid(row=0, column=col + 1)
 
-        # Create labels for rows (1, 2, 3, ...)
         for row in range(self.rows):
             label = tk.Label(self.root, text=str(row + 1), relief=tk.RIDGE, width=5)
             label.grid(row=row + 1, column=0)
-
-            # Create entry cells for each row and column
             for col in range(self.columns):
                 var = tk.StringVar()
                 entry = tk.Entry(self.root, textvariable=var, relief=tk.RIDGE, width=10, highlightcolor='gray', highlightthickness=1)
@@ -67,14 +72,15 @@ class SpreadsheetApp:
                 entry.bind("<Left>", self.on_left)
                 entry.bind("<KeyRelease>", self.update_text_box_content)
 
-        # Create a Text widget below the grid for displaying cell content
         self.text_box = tk.Text(self.root, height=5, width=50)
-        self.text_box.grid(row=self.rows + 2 ,column=0, columnspan=self.columns + 1, padx=5, pady=5)
+        self.text_box.grid(row=self.rows + 2, column=0, columnspan=self.columns + 1, padx=5, pady=5)
         self.text_box.bind("<KeyRelease>", self.update_text_content)
-        self.load_button = tk.Button(self.root,height=5,width=10,text='Load CSV file')
-        self.load_button.grid(row=self.rows+5,padx=5,pady=1,column=1,columnspan=13)
-        self.save_button = tk.Button(self.root,height=5,width=10,text='Save CSV file')
-        self.save_button.grid(row=self.rows+5,padx=5,pady=1,column=0,columnspan=3)
+        self.load_button = tk.Button(self.root, height=5, width=10, text='Load CSV file', command=self.load_csv)
+        self.load_button.grid(row=self.rows + 5, padx=5, pady=1, column=1, columnspan=13)
+        self.save_button = tk.Button(self.root, height=5, width=10, text='Save CSV file', command=self.save_csv)
+        self.save_button.grid(row=self.rows + 5, padx=5, pady=1, column=0, columnspan=3)
+        self.clear_button = tk.Button(self.root, height=5, width=10, text='Clear', command=self.clear_cells)
+        self.clear_button.grid(row=self.rows + 5, padx=5, pady=1, column=self.columns - 1, columnspan=3)
         self.deselect_all_cells()
 
     def update_text_content(self, event):
@@ -143,7 +149,7 @@ class SpreadsheetApp:
         self.entries[(row, col)].config(bg='lightblue', highlightbackground='black', highlightcolor='black', highlightthickness=1)
         self.previous_cell = (row, col)
         self.entries[(row, col)].focus()
-        val= self.variables[(row,col)].get()
+        val = self.variables[(row, col)].get()
         print(val)
 
     def update_text_box_content(self, event):
@@ -177,8 +183,8 @@ class SpreadsheetApp:
             end_row = self.rows - 1
         if end_col is None:
             end_col = self.columns - 1
-        self.focus_cell(start_row,start_col)
-        self.selected_cell = (start_row,start_col)
+        self.focus_cell(start_row, start_col)
+        self.selected_cell = (start_row, start_col)
         self.update_text_box_content(None)
         top_row = min(start_row, end_row)
         bottom_row = max(start_row, end_row)
@@ -202,14 +208,12 @@ class SpreadsheetApp:
         cell_width = self.entries[(0, 0)].winfo_width()
         cell_height = self.entries[(0, 0)].winfo_height()
 
-        # Calculate column based on x position
         col = int((relative_x - 50) / cell_width)
         if col < 0:
             col = 0
         elif col >= self.columns:
             col = self.columns - 1
 
-        # Calculate row based on y position
         row = int((relative_y - 25) / cell_height)
         if row < 0:
             row = 0
@@ -217,6 +221,37 @@ class SpreadsheetApp:
             row = self.rows - 1
 
         return row, col
+
+    def load_csv(self):
+        file_path = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
+        if not file_path:
+            return
+        with open(file_path, 'r') as file:
+            reader = csv.reader(file)
+            for row_idx, row in enumerate(reader):
+                if row_idx >= self.rows:
+                    break
+                for col_idx, value in enumerate(row):
+                    if col_idx >= self.columns:
+                        break
+                    self.variables[(row_idx, col_idx)].set(value)
+
+    def save_csv(self):
+        file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV Files", "*.csv")])
+        if not file_path:
+            return
+        with open(file_path, 'w', newline='') as file:
+            writer = csv.writer(file)
+            for row in range(self.rows):
+                row_data = []
+                for col in range(self.columns):
+                    row_data.append(self.variables[(row, col)].get())
+                writer.writerow(row_data)
+
+    def clear_cells(self):
+        for row in range(self.rows):
+            for col in range(self.columns):
+                self.variables[(row, col)].set("")
 
 if __name__ == "__main__":
     root = tk.Tk()
