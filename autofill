@@ -1,0 +1,22 @@
+#a su vrednosti iz selektovanih pojlja
+#b je broj polja koje autofilujemo
+def pattern(a,b):
+    t=0
+    p=[]
+    for x in a:
+        if not (x.isnumeric()):
+            t=1
+    if (t!=0):
+        for i in range(b):
+            p.append(a[i%len(a)-1])
+    else:
+        s=0
+        for x in a:
+            s=s+int(x)-int(a[0])
+        s=s/len(a)
+        c=int(a[len(a)-1])
+        for i in range(b):
+            c=c+s
+            p.append(c)
+    return(p)
+#funkcija vraca listu stringova cime treba da upotpunimo autofilana polja
