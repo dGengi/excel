@@ -6,15 +6,15 @@ from matplotlib import font_manager
 root = tk.Tk()
 root.geometry("100x600")
 
-# tekst iz kolone
-text_label = Label(root, text="tekst iz kolone", font=("Arial", 16))
-text_label.pack(pady=20)
-def change_font(font_name):
+# probni tekst
+text_label=Label(root,text="skskfkf",font=16)
+text_label.pack()
+def change_font(ime_fonta,ime_teksta):
     
-    text_label.config(font=(font_name, 16))
+    ime_teksta.config(font=(ime_fonta,16))
 
-def list_fonts():
-    """List available fonts and create a button for each."""
+def list_fonts(ime_teksta):
+    #Svi fontovi u bazi pythona
     available_fonts = sorted([f.name for f in font_manager.fontManager.ttflist])
     
     # ovo je napravljeno za scrolanje niz fontove
@@ -28,11 +28,15 @@ def list_fonts():
     frame.bind("<Configure>", lambda event, canvas=canvas: canvas.configure(scrollregion=canvas.bbox("all")))
 
     for font in available_fonts:
-        myButton = Button(frame, text=font, command=lambda f=font: change_font(f))
+        myButton = Button(frame, text=font, command=lambda f=font: change_font(f,ime_teksta))
         myButton.pack()
 
+#ime_teksta se unosi pa se onda menja font
+ime_teksta=text_label
+
 # dugme za otvaranje liste fontova
-font_button = Button(root, text="Change Fonts", command=list_fonts)
+font_button = Button(root, text="Change Fonts", command=list_fonts(ime_teksta))
 font_button.pack(pady=10)
 
 root.mainloop()
+
