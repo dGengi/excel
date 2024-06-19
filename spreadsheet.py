@@ -23,35 +23,31 @@ class SpreadsheetApp:
         self.root.bind("<ButtonRelease-1>", self.end_drag)
 
     def start_drag(self, event):
-        
         self.start_x = event.x_root
         self.start_y = event.y_root
-        if self.start_y>25*(2*(self.rows+2)):
+        if self.start_y > 25 * (2 * (self.rows + 2)):
             return
         self.deselect_all_cells()
 
     def end_drag(self, event):
         self.end_x = event.x_root
         self.end_y = event.y_root
-        if self.start_y>25*((self.rows+2)*2):
+        if self.start_y > 25 * ((self.rows + 2) * 2):
             return
         if self.start_x == self.end_x and self.start_y == self.end_y:
             self.single_click_select()
         else:
-             self.select_cells_in_rectangle(self.start_x, self.start_y, self.end_x, self.end_y)
+            self.select_cells_in_rectangle(self.start_x, self.start_y, self.end_x, self.end_y)
 
     def create_widgets(self):
-        # Create labels for columns (A, B, C, ...)
         for col in range(self.columns):
             label = tk.Label(self.root, text=chr(65 + col), relief=tk.RIDGE, width=10)
             label.grid(row=0, column=col + 1)
 
-        # Create labels for rows (1, 2, 3, ...)
         for row in range(self.rows):
             label = tk.Label(self.root, text=str(row + 1), relief=tk.RIDGE, width=5)
             label.grid(row=row + 1, column=0)
 
-            # Create entry cells for each row and column
             for col in range(self.columns):
                 var = tk.StringVar()
                 entry = tk.Entry(self.root, textvariable=var, relief=tk.RIDGE, width=10, highlightcolor='gray', highlightthickness=1)
@@ -66,9 +62,8 @@ class SpreadsheetApp:
                 entry.bind("<Left>", self.on_left)
                 entry.bind("<KeyRelease>", self.update_text_box_content)
 
-        # Create a Text widget below the grid for displaying cell content
         self.text_box = tk.Text(self.root, height=5, width=50)
-        self.text_box.grid(row=self.rows + 2 ,column=0, columnspan=self.columns + 1, padx=5, pady=5)
+        self.text_box.grid(row=self.rows + 2, column=0, columnspan=self.columns + 1, padx=5, pady=5)
         self.text_box.bind("<KeyRelease>", self.update_text_content)
         self.deselect_all_cells()
 
@@ -138,8 +133,6 @@ class SpreadsheetApp:
         self.entries[(row, col)].config(bg='lightblue', highlightbackground='black', highlightcolor='black', highlightthickness=1)
         self.previous_cell = (row, col)
         self.entries[(row, col)].focus()
-        val= self.variables[(row,col)].get()
-        print(val)
 
     def update_text_box_content(self, event):
         if self.selected_cell:
@@ -154,8 +147,6 @@ class SpreadsheetApp:
 
     def single_click_select(self):
         row, col = self.get_cell_from_position(self.start_x, self.start_y)
-        if row == 12:
-            return
         if row is not None and col is not None:
             self.focus_cell(row, col)
             self.selected_cell = (row, col)
@@ -172,9 +163,8 @@ class SpreadsheetApp:
             end_row = self.rows - 1
         if end_col is None:
             end_col = self.columns - 1
-        self.focus_cell(start_row,start_col)
-        self.selected_cell = (start_row,start_col)
-        self.update_text_box_content(None)
+        self.focus_cell(start_row, start_col)
+        self.selected_cell = (start_row, start_col)
         top_row = min(start_row, end_row)
         bottom_row = max(start_row, end_row)
         left_col = min(start_col, end_col)
@@ -197,14 +187,12 @@ class SpreadsheetApp:
         cell_width = self.entries[(0, 0)].winfo_width()
         cell_height = self.entries[(0, 0)].winfo_height()
 
-        # Calculate column based on x position
         col = int((relative_x - 50) / cell_width)
         if col < 0:
             col = 0
         elif col >= self.columns:
             col = self.columns - 1
 
-        # Calculate row based on y position
         row = int((relative_y - 25) / cell_height)
         if row < 0:
             row = 0
@@ -217,3 +205,5 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = SpreadsheetApp(root)
     root.mainloop()
+
+
