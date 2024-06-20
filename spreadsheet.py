@@ -1,16 +1,14 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox,ttk
+from tkinter import filedialog, messagebox, ttk
 import csv
 import matplotlib.pyplot as plt
 import platform
 
 class SpreadsheetApp:
-    def __init__(self, root, rows=15, columns=10):
+    def __init__(self, root, rows=5, columns=40):
         self.root = root
         style = ttk.Style(root)
-        style.theme_use('default') 
-        
-        
+        style.theme_use('default')
         self.root.title("Spreadsheet")
         self.text_content = ""
         self.rows = rows
@@ -35,7 +33,6 @@ class SpreadsheetApp:
             self.left_distance=45
             self.upper_distance=92
 
-
         self.start_x = 0
         self.start_y = 0
         self.end_x = 0
@@ -43,19 +40,18 @@ class SpreadsheetApp:
 
         self.create_widgets()
         self.root.bind("<Button-1>", self.start_drag)
-        self.root.bind("<ButtonRelease-1>", self.end_drag) 
+        self.root.bind("<ButtonRelease-1>", self.end_drag)
 
         self.update_window_position()
 
     def update_window_position(self):
         self.window_x = self.root.winfo_rootx()
         self.window_y = self.root.winfo_rooty()
-        self.root.after(100, self.update_window_position)  
+        self.root.after(100, self.update_window_position)
 
     def start_drag(self, event):
         self.start_x = event.x_root
         self.start_y = event.y_root
-        #print(self.start_x,self.start_y)
         if self.start_y - self.window_y - self.upper_distance > self.rows * self.cell_height or self.start_x - self.window_x - self.left_distance > self.cell_width * (self.columns) or self.start_x - self.window_x < self.left_distance or self.start_y - self.window_y < self.upper_distance:
             return
         self.deselect_all_cells()
@@ -77,29 +73,50 @@ class SpreadsheetApp:
         self.text_box = tk.Text(button_frame, height=2, width=25)
         self.text_box.grid(row=0, column=0, padx=5, pady=1)
         self.text_box.bind("<KeyRelease>", self.update_text_content)
-        
+
         self.load_button = tk.Button(button_frame, height=2, width=15, text='Load CSV file', command=self.load_csv)
         self.load_button.grid(row=0, column=2, padx=5, pady=1)
-        
+
         self.save_button = tk.Button(button_frame, height=2, width=15, text='Save CSV file', command=self.save_csv)
         self.save_button.grid(row=0, column=3, padx=5, pady=1)
-        
+
         self.clear_button = tk.Button(button_frame, height=2, width=15, text='Clear', command=self.clear_cells)
         self.clear_button.grid(row=0, column=4, padx=5, pady=1)
-        
+
         self.save_chart_button = tk.Button(button_frame, height=2, width=15, text='Save Bar Chart', command=self.save_bar_chart)
         self.save_chart_button.grid(row=0, column=5, padx=5, pady=1)
 
+        self.add_row_button = tk.Button(button_frame, height=2, width=15, text='Add Row', command=self.add_row)
+        self.add_row_button.grid(row=0, column=6, padx=5, pady=1)
+
+        self.add_column_button = tk.Button(button_frame, height=2, width=15, text='Add Column', command=self.add_column)
+        self.add_column_button.grid(row=0, column=7, padx=5, pady=1)
+
+        # Create canvas and scrollbars
+        self.canvas = tk.Canvas(self.root)
+        self.canvas.grid(row=1, column=0, sticky='nsew')
+
+        self.v_scrollbar = tk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
+        self.v_scrollbar.grid(row=1, column=1, sticky='ns')
+        self.h_scrollbar = tk.Scrollbar(self.root, orient="horizontal", command=self.canvas.xview)
+        self.h_scrollbar.grid(row=2, column=0, sticky='ew')
+
+        self.canvas.configure(yscrollcommand=self.v_scrollbar.set, xscrollcommand=self.h_scrollbar.set)
+        self.canvas.bind('<Configure>', lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+
+        self.inner_frame = tk.Frame(self.canvas)
+        self.canvas.create_window((0, 0), window=self.inner_frame, anchor="nw")
+
         for col in range(self.columns):
-            label = tk.Label(self.root, text=chr(65 + col), relief=tk.RIDGE, width=10)
+            label = tk.Label(self.inner_frame, text=self.get_column_letter(col), relief=tk.RIDGE, width=10)
             label.grid(row=1, column=col + 1)
 
         for row in range(self.rows):
-            label = tk.Label(self.root, text=str(row + 1), relief=tk.RIDGE, width=5)
+            label = tk.Label(self.inner_frame, text=str(row + 1), relief=tk.RIDGE, width=5)
             label.grid(row=row + 2, column=0)
             for col in range(self.columns):
                 var = tk.StringVar()
-                entry = tk.Entry(self.root, textvariable=var, relief=tk.RIDGE ,width=10, highlightcolor='gray', highlightthickness=1)
+                entry = tk.Entry(self.inner_frame, textvariable=var, relief=tk.RIDGE, width=10, highlightcolor='gray', highlightthickness=1)
                 entry.grid(row=row + 2, column=col + 1)
                 self.entries[(row, col)] = entry
                 self.variables[(row, col)] = var
@@ -111,9 +128,18 @@ class SpreadsheetApp:
                 entry.bind("<Left>", self.on_left)
                 entry.bind("<KeyRelease>", self.update_text_box_content)
 
-        
-
         self.deselect_all_cells()
+
+        # Configure grid to make canvas and scrollbars resizable
+        self.root.grid_rowconfigure(1, weight=1)
+        self.root.grid_columnconfigure(0, weight=1)
+
+    def get_column_letter(self, col):
+        letter = ''
+        while col >= 0:
+            letter = chr(col % 26 + ord('A')) + letter
+            col = col // 26 - 1
+        return letter
 
     def update_text_content(self, event):
         self.text_content = self.text_box.get("1.0", tk.END).strip()
@@ -170,37 +196,27 @@ class SpreadsheetApp:
         return "break"
 
     def get_current_cell(self, widget):
-        for (row, col), entry in self.entries.items():
+        for (r, c), entry in self.entries.items():
             if entry == widget:
-                return row, col
+                return r, c
         return None, None
 
     def focus_cell(self, row, col):
-        for entry in self.entries.values():
-            entry.config(bg='white', highlightbackground='gray', highlightcolor='gray', highlightthickness=1)
+        self.entries[(row, col)].focus_set()
+        self.deselect_all_cells()
         self.entries[(row, col)].config(bg='lightblue', highlightbackground='black', highlightcolor='black', highlightthickness=1)
-        self.previous_cell = (row, col)
-        self.entries[(row, col)].focus()
-        val = self.variables[(row, col)].get()
-      #  print(val)
+        self.selected_cell = (row, col)
 
     def update_text_box_content(self, event):
         if self.selected_cell:
             row, col = self.selected_cell
-            content = self.variables[(row, col)].get()
+            self.text_content = self.variables[(row, col)].get()
             self.text_box.delete("1.0", tk.END)
-            self.text_box.insert(tk.END, content)
+            self.text_box.insert(tk.END, self.text_content)
 
     def deselect_all_cells(self):
         for entry in self.entries.values():
             entry.config(bg='white', highlightbackground='gray', highlightcolor='gray', highlightthickness=1)
-
-    def single_click_select(self):
-        row, col = self.get_cell_from_position(self.start_x, self.start_y)
-        if row is not None and col is not None:
-            self.focus_cell(row, col)
-            self.selected_cell = (row, col)
-            self.update_text_box_content(None)
 
     def select_cells_in_rectangle(self, x, y, z, g):
         start_row, start_col = self.get_cell_from_position(self.start_x, self.start_y)
@@ -227,7 +243,6 @@ class SpreadsheetApp:
         for row in range(top_row, bottom_row + 1):
             for col in range(left_col, right_col + 1):
                 self.entries[(row, col)].config(bg='lightblue', highlightbackground='black', highlightcolor='black', highlightthickness=1)
-
     def get_cell_from_position(self, x, y):
         row = int((y - self.window_y - self.upper_distance) // self.cell_height)
         col = int((x - self.window_x - self.left_distance) // self.cell_width)
@@ -235,39 +250,34 @@ class SpreadsheetApp:
             return row, col
         return None, None
 
-    def load_csv(self):
-        file_path = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
-        if not file_path:
-            return
+    def single_click_select(self):
+        selected_widget = self.root.focus_get()
+        if isinstance(selected_widget, tk.Entry):
+            row, col = self.get_current_cell(selected_widget)
+            self.deselect_all_cells()
+            self.focus_cell(row, col)
+            self.selected_cell = (row, col)
+            self.update_text_box_content(None)
 
-        with open(file_path, newline='') as file:
-            reader = csv.reader(file)
-            for r, row in enumerate(reader):
-                if r >= self.rows:
-                    break
-                for c, value in enumerate(row):
-                    if c >= self.columns:
-                        break
-                    self.variables[(r, c)].set(value)
+    def load_csv(self):
+        file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+        if file_path:
+            with open(file_path, 'r') as file:
+                reader = csv.reader(file)
+                for r, row in enumerate(reader):
+                    for c, val in enumerate(row):
+                        if r < self.rows and c < self.columns:
+                            self.variables[(r, c)].set(val)
 
     def save_csv(self):
-        file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV Files", "*.csv")])
-        if not file_path:
-            return
-
-        with open(file_path, 'w', newline='') as file:
-            writer = csv.writer(file)
-            for row in range(self.rows):
-                row_data = []
-                for col in range(self.columns):
-                    row_data.append(self.variables[(row, col)].get())
-                writer.writerow(row_data)
-
-    def clear_cells(self):
-        for var in self.variables.values():
-            var.set("")
-        self.deselect_all_cells()
-        self.text_box.delete("1.0", tk.END)
+        file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
+        if file_path:
+            with open(file_path, 'w', newline='') as file:
+                writer = csv.writer(file)
+                for r in range(self.rows):
+                    row = [self.variables[(r, c)].get() for c in range(self.columns)]
+                    writer.writerow(row)
+            messagebox.showinfo("Save CSV", "CSV file saved successfully.")
 
     def save_bar_chart(self):
         selected_entries = []
@@ -334,9 +344,55 @@ class SpreadsheetApp:
         plt.close()
         messagebox.showinfo("Success", f"Bar chart saved as {file_path}")
 
+    def clear_cells(self):
+        for var in self.variables.values():
+            var.set("")
+        self.update_text_box_content(None)
+        
+
+    def add_row(self):
+        new_row = self.rows
+        self.rows += 1
+        label = tk.Label(self.inner_frame, text=str(new_row + 1), relief=tk.RIDGE, width=5)
+        label.grid(row=new_row + 2, column=0)
+        for col in range(self.columns):
+            var = tk.StringVar()
+            entry = tk.Entry(self.inner_frame, textvariable=var, relief=tk.RIDGE, width=10, highlightcolor='gray', highlightthickness=1)
+            entry.grid(row=new_row + 2, column=col + 1)
+            self.entries[(new_row, col)] = entry
+            self.variables[(new_row, col)] = var
+            entry.bind("<Tab>", self.on_tab)
+            entry.bind("<Return>", self.on_return)
+            entry.bind("<Down>", self.on_down)
+            entry.bind("<Up>", self.on_up)
+            entry.bind("<Right>", self.on_right)
+            entry.bind("<Left>", self.on_left)
+            entry.bind("<KeyRelease>", self.update_text_box_content)
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        self.deselect_all_cells()
+
+    def add_column(self):
+        new_col = self.columns
+        self.columns += 1
+        label = tk.Label(self.inner_frame, text=self.get_column_letter(new_col), relief=tk.RIDGE, width=10)
+        label.grid(row=1, column=new_col + 1)
+        for row in range(self.rows):
+            var = tk.StringVar()
+            entry = tk.Entry(self.inner_frame, textvariable=var, relief=tk.RIDGE, width=10, highlightcolor='gray', highlightthickness=1)
+            entry.grid(row=row + 2, column=new_col + 1)
+            self.entries[(row, new_col)] = entry
+            self.variables[(row, new_col)] = var
+            entry.bind("<Tab>", self.on_tab)
+            entry.bind("<Return>", self.on_return)
+            entry.bind("<Down>", self.on_down)
+            entry.bind("<Up>", self.on_up)
+            entry.bind("<Right>", self.on_right)
+            entry.bind("<Left>", self.on_left)
+            entry.bind("<KeyRelease>", self.update_text_box_content)
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        self.deselect_all_cells()
+
 if __name__ == "__main__":
     root = tk.Tk()
-    app = SpreadsheetApp(root)  
-    
-
+    app = SpreadsheetApp(root)
     root.mainloop()
