@@ -6,9 +6,8 @@ from matplotlib import font_manager
 root = tk.Tk()
 root.geometry("100x600")
 
-# probni tekst
-text_label=Label(root,text="skskfkf",font=16)
-text_label.pack()
+row, col = self.selected_cell
+val = self.variables[(row, col)].get()
 def change_font(ime_fonta,ime_teksta):
     
     ime_teksta.config(font=(ime_fonta,16))
@@ -31,8 +30,7 @@ def list_fonts(ime_teksta):
         myButton = Button(frame, text=font, command=lambda f=font: change_font(f,ime_teksta))
         myButton.pack()
 
-#ime_teksta se unosi pa se onda menja font
-ime_teksta=text_label
+ime_teksta=val
 
 # dugme za otvaranje liste fontova
 font_button = Button(root, text="Change Fonts", command=list_fonts(ime_teksta))
@@ -46,18 +44,8 @@ root.mainloop()
 
 
 
-
-import tkinter as tk
-from tkinter import *
-from matplotlib import font_manager
-
-
-root = tk.Tk()
-root.geometry("100x600")
-
-# probni tekst
-text_label=Label(root,text="skskfkf",font=16)
-text_label.pack()
+row, col = self.selected_cell
+val = self.variables[(row, col)].get()
 def promena_velicine(velicina,ime_teksta):
     
     ime_teksta.config(font=("Arial",velicina))
@@ -78,7 +66,7 @@ def lista_velicina(ime_teksta):
         myButton.pack()
 
 #ime_teksta se unosi pa se onda menja font
-ime_teksta=text_label
+ime_teksta=val
 
 # dugme za otvaranje liste velicina
 font_button = Button(root, text="promena velicine", command=lista_velicina(ime_teksta))
