@@ -43,7 +43,7 @@ def list_fonts(ime_teksta):
 
 
 # dugme za otvaranje liste fontova
-font_button = Button(root, text="Change Fonts", command=list_fonts(ime_teksta))
+font_button = Button(root, text="Change Fonts", command=lambda: list_fonts(ime_teksta))
 font_button.pack(pady=10)
 
 
@@ -97,8 +97,9 @@ def get_current_font_family(ime_teksta):
 
 
 # dugme za otvaranje liste velicina
-font_button = Button(root, text="promena velicine", command=lista_velicina(ime_teksta))
+font_button = Button(root, text="promena velicine", command=lambda: lista_velicina(ime_teksta))
 font_button.pack(pady=10)
 
 root.mainloop()
+
 
