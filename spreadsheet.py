@@ -2,10 +2,15 @@ import tkinter as tk
 from tkinter import filedialog, messagebox,ttk
 import csv
 import matplotlib.pyplot as plt
+import platform
 
 class SpreadsheetApp:
     def __init__(self, root, rows=15, columns=10):
         self.root = root
+        style = ttk.Style(root)
+        style.theme_use('default') 
+        
+        
         self.root.title("Spreadsheet")
         self.text_content = ""
         self.rows = rows
@@ -15,6 +20,21 @@ class SpreadsheetApp:
         self.entries = {}
         self.variables = {}
         self.prevent_navigation = False
+        self.cell_height=0
+        self.cell_width=0
+        self.upper_distance=0
+        self.left_distance=0
+        if platform.system() == 'Windows':
+            self.cell_height=20.86
+            self.cell_width=76.3
+            self.left_distance=40
+            self.upper_distance=70
+        if platform.system() == 'Linux':
+            self.cell_height=24.7
+            self.cell_width=85.8
+            self.left_distance=45
+            self.upper_distance=92
+
 
         self.start_x = 0
         self.start_y = 0
@@ -36,14 +56,14 @@ class SpreadsheetApp:
         self.start_x = event.x_root
         self.start_y = event.y_root
         #print(self.start_x,self.start_y)
-        if self.start_y - self.window_y > 26 + 24.7 * (self.rows ) + 66 or self.start_x - self.window_x> 86 * (self.columns)+45 or self.start_x - self.window_x < 45 or self.start_y - self.window_y-66<26:
+        if self.start_y - self.window_y - self.upper_distance > self.rows * self.cell_height or self.start_x - self.window_x - self.left_distance > self.cell_width * (self.columns) or self.start_x - self.window_x < self.left_distance or self.start_y - self.window_y < self.upper_distance:
             return
         self.deselect_all_cells()
 
     def end_drag(self, event):
         self.end_x = event.x_root
         self.end_y = event.y_root
-        if self.start_y - self.window_y > 26 + 24.7 * (self.rows ) +66 or self.start_x - self.window_x> 86 * (self.columns)+45 or self.start_x - self.window_x < 45 or self.start_y - self.window_y-66<26:
+        if self.start_y - self.window_y - self.upper_distance > self.rows * self.cell_height or self.start_x - self.window_x - self.left_distance > self.cell_width * (self.columns) or self.start_x - self.window_x < self.left_distance or self.start_y - self.window_y < self.upper_distance:
             return
         if self.start_x == self.end_x and self.start_y == self.end_y:
             self.single_click_select()
@@ -162,7 +182,7 @@ class SpreadsheetApp:
         self.previous_cell = (row, col)
         self.entries[(row, col)].focus()
         val = self.variables[(row, col)].get()
-        print(val)
+      #  print(val)
 
     def update_text_box_content(self, event):
         if self.selected_cell:
@@ -209,8 +229,8 @@ class SpreadsheetApp:
                 self.entries[(row, col)].config(bg='lightblue', highlightbackground='black', highlightcolor='black', highlightthickness=1)
 
     def get_cell_from_position(self, x, y):
-        row = int((y - self.window_y - 26-66) // 24.7)
-        col = int((x - self.window_x - 45) // 86)
+        row = int((y - self.window_y - self.upper_distance) // self.cell_height)
+        col = int((x - self.window_x - self.left_distance) // self.cell_width)
         if 0 <= row < self.rows and 0 <= col < self.columns:
             return row, col
         return None, None
@@ -317,8 +337,6 @@ class SpreadsheetApp:
 if __name__ == "__main__":
     root = tk.Tk()
     app = SpreadsheetApp(root)  
-    style = ttk.Style(root)
-    style.theme_use('default') 
-    font =('Arial',10)
+    
 
     root.mainloop()
