@@ -9,30 +9,6 @@ text = Label(root, text="mjau", font=("Arial", 16))
 text.pack()
 ime_teksta = text
 
-font_frame = Frame(root)
-font_frame.pack(side="left", fill="both", expand=True)
-
-size_frame = Frame(root)
-size_frame.pack(side="right", fill="both", expand=True)
-
-canvas_font = Canvas(font_frame)
-frame_font = Frame(canvas_font)
-scrollbar_font = Scrollbar(font_frame, orient="vertical", command=canvas_font.yview)
-canvas_font.configure(yscrollcommand=scrollbar_font.set)
-scrollbar_font.pack(side="right", fill="y")
-canvas_font.pack(side="left", fill="both", expand=True)
-canvas_font.create_window((0, 0), window=frame_font, anchor="nw")
-frame_font.bind("<Configure>", lambda event, canvas=canvas_font: canvas.configure(scrollregion=canvas.bbox("all")))
-
-canvas_size = Canvas(size_frame)
-frame_size = Frame(canvas_size)
-scrollbar_size = Scrollbar(size_frame, orient="vertical", command=canvas_size.yview)
-canvas_size.configure(yscrollcommand=scrollbar_size.set)
-scrollbar_size.pack(side="right", fill="y")
-canvas_size.pack(side="left", fill="both", expand=True)
-canvas_size.create_window((0, 0), window=frame_size, anchor="nw")
-frame_size.bind("<Configure>", lambda event, canvas=canvas_size: canvas.configure(scrollregion=canvas.bbox("all")))
-
 font_list_visible = False
 size_list_visible = False
 
@@ -42,17 +18,18 @@ def change_font(ime_fonta, ime_teksta, trenutna_velicina):
 def toggle_fonts(ime_teksta):
     global font_list_visible
     if font_list_visible:
-        # Clear existing widgets in frame_font
+        # Clear existing widgets in frame_font and scrollbar
         for widget in frame_font.winfo_children():
             widget.destroy()
+        scrollbar_font.pack_forget()
+        canvas_font.pack_forget()
         font_list_visible = False
     else:
         list_fonts(ime_teksta)
         font_list_visible = True
 
 def list_fonts(ime_teksta):
-    desired_fonts = {"Calibri", "Arial", "Times New Roman", "Cambria", "Algerian"}
-    available_fonts = sorted([f.name for f in font_manager.fontManager.ttflist if f.name in desired_fonts])
+    available_fonts = sorted([f.name for f in font_manager.fontManager.ttflist ])
 
     # Clear existing widgets in frame_font
     for widget in frame_font.winfo_children():
@@ -63,15 +40,21 @@ def list_fonts(ime_teksta):
         myButton = Button(frame_font, text=font, command=lambda f=font: change_font(f, ime_teksta, font_size))
         myButton.pack()
 
+    # Pack the canvas and scrollbar after adding buttons
+    canvas_font.pack(side="left", fill="both", expand=True)
+    scrollbar_font.pack(side="right", fill="y")
+
 def promena_velicine(velicina, ime_teksta, trenutni_font):
     ime_teksta.config(font=(trenutni_font, velicina))
 
 def toggle_sizes(ime_teksta):
     global size_list_visible
     if size_list_visible:
-        # Clear existing widgets in frame_size
+        # Clear existing widgets in frame_size and scrollbar
         for widget in frame_size.winfo_children():
             widget.destroy()
+        scrollbar_size.pack_forget()
+        canvas_size.pack_forget()
         size_list_visible = False
     else:
         lista_velicina(ime_teksta)
@@ -87,6 +70,10 @@ def lista_velicina(ime_teksta):
         myButton = Button(frame_size, text=str(i), command=lambda f=i: promena_velicine(f, ime_teksta, font_family))
         myButton.pack()
 
+    # Pack the canvas and scrollbar after adding buttons
+    canvas_size.pack(side="left", fill="both", expand=True)
+    scrollbar_size.pack(side="right", fill="y")
+
 def get_current_font_size(ime_teksta):
     current_font = ime_teksta.cget("font")
     font_parts = current_font.split()
@@ -100,6 +87,28 @@ def get_current_font_family(ime_teksta):
     if len(font_parts) > 0:
         font_family = font_parts[0]
         return font_family
+
+# Create font_frame and associated widgets
+font_frame = Frame(root)
+canvas_font = Canvas(font_frame)
+frame_font = Frame(canvas_font)
+scrollbar_font = Scrollbar(font_frame, orient="vertical", command=canvas_font.yview)
+canvas_font.configure(yscrollcommand=scrollbar_font.set)
+canvas_font.create_window((0, 0), window=frame_font, anchor="nw")
+frame_font.bind("<Configure>", lambda event, canvas=canvas_font: canvas.configure(scrollregion=canvas.bbox("all")))
+
+# Create size_frame and associated widgets
+size_frame = Frame(root)
+canvas_size = Canvas(size_frame)
+frame_size = Frame(canvas_size)
+scrollbar_size = Scrollbar(size_frame, orient="vertical", command=canvas_size.yview)
+canvas_size.configure(yscrollcommand=scrollbar_size.set)
+canvas_size.create_window((0, 0), window=frame_size, anchor="nw")
+frame_size.bind("<Configure>", lambda event, canvas=canvas_size: canvas.configure(scrollregion=canvas.bbox("all")))
+
+# Pack font_frame and size_frame initially
+font_frame.pack(side="left", fill="both", expand=True)
+size_frame.pack(side="right", fill="both", expand=True)
 
 # Button to open the list of fonts
 font_button = Button(root, text="Change Fonts", command=lambda: toggle_fonts(ime_teksta))
