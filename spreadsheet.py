@@ -3,9 +3,12 @@ from tkinter import filedialog, messagebox, ttk
 import csv
 import matplotlib.pyplot as plt
 import platform
+from Parserdd import *
+from column_conversion import *
+
 
 class SpreadsheetApp:
-    def __init__(self, root, rows=5, columns=40):
+    def __init__(self, root, rows=5, columns=10):
         self.root = root
         style = ttk.Style(root)
         style.theme_use('default')
@@ -17,6 +20,7 @@ class SpreadsheetApp:
         self.previous_cell = None
         self.entries = {}
         self.variables = {}
+        
         self.prevent_navigation = False
         self.cell_height=0
         self.cell_width=0
@@ -41,6 +45,7 @@ class SpreadsheetApp:
         self.create_widgets()
         self.root.bind("<Button-1>", self.start_drag)
         self.root.bind("<ButtonRelease-1>", self.end_drag)
+        self.root.bind("<Return>",self.formula_eval)
 
         self.update_window_position()
 
@@ -92,7 +97,6 @@ class SpreadsheetApp:
         self.add_column_button = tk.Button(button_frame, height=2, width=15, text='Add Column', command=self.add_column)
         self.add_column_button.grid(row=0, column=7, padx=5, pady=1)
 
-        # Create canvas and scrollbars
         self.canvas = tk.Canvas(self.root)
         self.canvas.grid(row=1, column=0, sticky='nsew')
 
@@ -120,17 +124,17 @@ class SpreadsheetApp:
                 entry.grid(row=row + 2, column=col + 1)
                 self.entries[(row, col)] = entry
                 self.variables[(row, col)] = var
-                entry.bind("<Tab>", self.on_tab)
-                entry.bind("<Return>", self.on_return)
+                
                 entry.bind("<Down>", self.on_down)
                 entry.bind("<Up>", self.on_up)
                 entry.bind("<Right>", self.on_right)
                 entry.bind("<Left>", self.on_left)
                 entry.bind("<KeyRelease>", self.update_text_box_content)
+                
 
         self.deselect_all_cells()
 
-        # Configure grid to make canvas and scrollbars resizable
+        
         self.root.grid_rowconfigure(1, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
 
@@ -140,6 +144,22 @@ class SpreadsheetApp:
             letter = chr(col % 26 + ord('A')) + letter
             col = col // 26 - 1
         return letter
+    
+    def formula_eval(self, event):
+        if self.selected_cell:
+            row, col = self.selected_cell
+            value = str(self.variables[(row, col)].get())
+            print(value)
+            if(value[0] == '='):
+                try:
+                    self.variables[(row,col)].set(evaluate(value[1:],self.variables))
+                except:
+                    self.variables[(row,col)].set("#ERROR!")
+            else:
+                self.variables[(row,col)].set("#ERROR!")
+
+            
+        
 
     def update_text_content(self, event):
         self.text_content = self.text_box.get("1.0", tk.END).strip()
