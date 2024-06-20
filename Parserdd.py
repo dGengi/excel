@@ -126,15 +126,11 @@ def transform_eq(tokens):
 def transform(tokens, L, keys):
     tokens = transform_intervals(tokens)
     tokens = transform_cells(tokens, L, keys)
-    if tokens == "ne valja ti ovo":
-        return "ne valja ti ovo"
     tokens = transform_eq(tokens)
     return tokens
 
 def izvrsi(tokens, L, keys):
     tokens = transform(tokens, L, keys)
-    if tokens == "ne valja ti ovo":
-        return "ne valja ti ovo"
     tokens2 = []
     i = 0
     while i < len(tokens):
