@@ -2,9 +2,8 @@ from column_conversion import *
 #from structure import *
 from funkcije import *
 import re
-from spreadsheet import SpreadsheetApp
 
-funkcije = ['SUM', 'AVERAGE', 'MAX', 'MIN', 'PRODUCT', 'IF', 'AND', 'OR', 'NOT', 'COUNT', 'MEDIAN']
+funkcije = ['SUM', 'AVERAGE', 'MAX', 'MIN', 'PRODUCT', 'IF', 'AND', 'OR', 'NOT', 'MEDIAN', 'COUNT']
 i = 0
 
 def transform_intervals(tokens : list) -> list:
@@ -65,7 +64,7 @@ def split_letter_number(reference):
 
 def cell_range(range : str):
     left, right = split_string_by_colon(range)
-    print(left)
+    #print(left)
     x, y = split_letter_number(left)
     x1, y1 = split_letter_number(right)
     values = []
@@ -103,13 +102,13 @@ def is_excel_cell_format(s):
 #d.generate_cell('A', 2, 11)
 #d.generate_cell('A', 3, 4)
 
-def transform_cells(tokens, ss):
+def transform_cells(tokens, variables = None):
     for i in range(len(tokens)):
         if is_excel_cell_format(tokens[i]):
             col, row = split_letter_number(tokens[i])
             col = csti(col) - 1
             row -= 1
-            tokens[i] = ss.variables[(row, col)].get()
+            tokens[i] = str(variables[(row, col)].get())
     return tokens
 
 def transform_eq(tokens):
@@ -118,14 +117,14 @@ def transform_eq(tokens):
             tokens[i] = "=="
     return tokens
 
-def transform(tokens, ss = None):
+def transform(tokens, variables = None):
     tokens = transform_intervals(tokens)
-    tokens = transform_cells(tokens, ss)
+    tokens = transform_cells(tokens, variables)
     tokens = transform_eq(tokens)
     return tokens
 
-def izvrsi(tokens, ss: SpreadsheetApp | None = None):
-    tokens = transform(tokens, ss)
+def izvrsi(tokens, variables = None):
+    tokens = transform(tokens, variables)
     tokens2 = []
     i = 0
     while i < len(tokens):
@@ -201,8 +200,8 @@ def izvrsi(tokens, ss: SpreadsheetApp | None = None):
     new_expression = "".join(tokens2)
     return str(eval(new_expression))
 
-#e0 = "COUNT(3, 2, 1)"
-#e1 = "MEDIAN(1, 2, 3, 4)"
+#e0 = "3+SUM(1,2)"
+#e1 = "SUM(1,3*AVERAGE(3,2,1))"
 #e2 = "PRODUCT(1, 2, SUM(3, 3, 5), 3)"
 #e3 = "IF(2=3, 5, -1)"
 #e4 = "NOT(AND(2=2, 3+3=6, OR(5+3=8, 2+2=5)))"
@@ -212,3 +211,9 @@ def izvrsi(tokens, ss: SpreadsheetApp | None = None):
 #print(izvrsi(tokenize(e2)))
 #print(izvrsi(tokenize(e3)))
 #print(izvrsi(tokenize(e4)))
+
+def evaluate(formula: str, variables = None):
+    return izvrsi(tokenize(formula), variables)
+
+
+#print(evaluate(e4, None))
