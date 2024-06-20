@@ -57,3 +57,22 @@ def OR(cells):
 
 def NOT(arg):
     return not eval(arg)
+
+def COUNT(cells: List[str]) -> int:
+    return len([cell for cell in cells if is_number(cell)])
+
+def MEDIAN(cells: List[str]) -> float:
+    cells2 = sorted([float(cell) for cell in cells])
+    n = len(cells2)
+    mid = n // 2
+    if n % 2 == 0:
+        return (cells2[mid - 1] + cells2[mid]) / 2.0
+    else:
+        return cells2[mid]
+    
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
