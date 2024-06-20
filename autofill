@@ -1,4 +1,6 @@
-#a su vrednosti iz selektovanih pojlja
+from Parserdd import transform_cells
+# x i y su krajnja selektovana polja recimo A1 i A5
+a=transform_cells(seleketovana_polja(x,y),ss)
 #b je broj polja koje autofilujemo
 def pattern(a,b):
     t=0
