@@ -4,7 +4,7 @@ from funkcije import *
 import re
 from spreadsheet import SpreadsheetApp
 
-funkcije = ['SUM', 'AVERAGE', 'MAX', 'MIN', 'PRODUCT', 'IF', 'AND', 'OR', 'NOT']
+funkcije = ['SUM', 'AVERAGE', 'MAX', 'MIN', 'PRODUCT', 'IF', 'AND', 'OR', 'NOT', 'COUNT', 'MEDIAN']
 i = 0
 
 def transform_intervals(tokens : list) -> list:
@@ -190,6 +190,10 @@ def izvrsi(tokens, ss: SpreadsheetApp | None = None):
                 tokens2.append(str(OR(l3)))
             elif f == "NOT":
                 tokens2.append(str(NOT(l3[0])))
+            elif f == 'MEDIAN':
+                tokens2.append(str(MEDIAN(l3)))
+            elif f == 'COUNT':
+                tokens2.append(str(COUNT(l3)))
             i = kraj
         else:
             tokens2.append(tokens[i])
@@ -197,8 +201,8 @@ def izvrsi(tokens, ss: SpreadsheetApp | None = None):
     new_expression = "".join(tokens2)
     return str(eval(new_expression))
 
-#e0 = "3+SUM(1,2)"
-#e1 = "SUM(1,3*AVERAGE(3,2,1))"
+#e0 = "COUNT(3, 2, 1)"
+#e1 = "MEDIAN(1, 2, 3, 4)"
 #e2 = "PRODUCT(1, 2, SUM(3, 3, 5), 3)"
 #e3 = "IF(2=3, 5, -1)"
 #e4 = "NOT(AND(2=2, 3+3=6, OR(5+3=8, 2+2=5)))"
