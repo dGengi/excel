@@ -1,4 +1,6 @@
 from string import ascii_uppercase #niz A,B,C,...,Z
+from Parserdd import transform_cells
+from spreadsheet import SpreadsheetApp
 
 def col_str_to_int(col: str) -> int:
     result = 1
@@ -37,10 +39,6 @@ def broj(a):
     return s
 
 
-def select(a,b):
-    slovo1=a[0]
-    slovo2=b[1]
-    broj1
 
 def selektovana_polja(a,b):
     t=[]
@@ -54,4 +52,30 @@ def selektovana_polja(a,b):
         for j in range(abs(broj1-broj2)+1):
             p=cits(i+1)+str(j+1)
             t.append(p)
-            t.append(",")
+            #t.append(",")
+
+
+
+# x i y su krajnja selektovana polja recimo A1 i A5
+#b je broj polja koje autofilujemo
+def pattern(x,y,ss:SpreadsheetApp,b):
+    a = transform_cells(selektovana_polja(x,y),ss)
+    t=0
+    p=[]
+    for x in a:
+        if not (x.isnumeric()):
+            t=1
+    if (t!=0):
+        for i in range(b):
+            p.append(a[i%len(a)-1])
+    else:
+        s=0
+        for x in a:
+            s=s+int(x)-int(a[0])
+        s=s/len(a)
+        c=int(a[len(a)-1])
+        for i in range(b):
+            c=c+s
+            p.append(c)
+    return(p)
+#funkcija vraca listu stringova cime treba da upotpunimo autofilana polja
