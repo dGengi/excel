@@ -114,7 +114,7 @@ def transform_cells(tokens, ss):
 
 def transform_eq(tokens):
     for i in range(len(tokens)):
-        if tokens[i] == "=":
+        if tokens[i] == "=" and tokens[i-1] not in "<>":
             tokens[i] = "=="
     return tokens
 
