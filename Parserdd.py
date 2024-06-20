@@ -102,13 +102,19 @@ def is_excel_cell_format(s):
 #d.generate_cell('A', 2, 11)
 #d.generate_cell('A', 3, 4)
 
-def transform_cells(tokens, variables = None):
+def transform_cells(tokens, L, keys):
     for i in range(len(tokens)):
         if is_excel_cell_format(tokens[i]):
             col, row = split_letter_number(tokens[i])
             col = csti(col) - 1
             row -= 1
-            tokens[i] = str(variables[(row, col)].get())
+            value = str(keys[(row, col)].get())
+            if len(value)>0 and value[0] == "=":
+                if (row, col) in L:
+                    raise OverflowError()
+                L.append((row, col))
+                value = izvrsi(tokenize(value[1:]), L, keys)
+            tokens[i] = value
     return tokens
 
 def transform_eq(tokens):
@@ -117,14 +123,18 @@ def transform_eq(tokens):
             tokens[i] = "=="
     return tokens
 
-def transform(tokens, variables = None):
+def transform(tokens, L, keys):
     tokens = transform_intervals(tokens)
-    tokens = transform_cells(tokens, variables)
+    tokens = transform_cells(tokens, L, keys)
+    if tokens == "ne valja ti ovo":
+        return "ne valja ti ovo"
     tokens = transform_eq(tokens)
     return tokens
 
-def izvrsi(tokens, variables = None):
-    tokens = transform(tokens, variables)
+def izvrsi(tokens, L, keys):
+    tokens = transform(tokens, L, keys)
+    if tokens == "ne valja ti ovo":
+        return "ne valja ti ovo"
     tokens2 = []
     i = 0
     while i < len(tokens):
@@ -212,8 +222,8 @@ def izvrsi(tokens, variables = None):
 #print(izvrsi(tokenize(e3)))
 #print(izvrsi(tokenize(e4)))
 
-def evaluate(formula: str, variables = None):
-    return izvrsi(tokenize(formula), variables)
+def evaluate(formula: str, cell = None, keys = None):
+    return izvrsi(tokenize(formula), [cell], keys)
 
 
 #print(evaluate(e4, None))
