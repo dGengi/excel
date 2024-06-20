@@ -22,7 +22,8 @@ size_list_visible = False
 
 
 #menjanje fontova
-def change_font(ime_fonta, ime_teksta, trenutna_velicina):
+def change_font(ime_fonta, ime_teksta):
+    trenutna_velicina=get_current_font_size(ime_teksta)
     ime_teksta.config(font=(ime_fonta, trenutna_velicina))
 
 def toggle_fonts(ime_teksta):
@@ -45,9 +46,9 @@ def list_fonts(ime_teksta):
     for widget in frame_font.winfo_children():
         widget.destroy()
 
-    font_size = get_current_font_size(ime_teksta)
+
     for font in available_fonts:
-        myButton = Button(frame_font, text=font, command=lambda f=font: change_font(f, ime_teksta, font_size))
+        myButton = Button(frame_font, text=font, command=lambda f=font: change_font(f, ime_teksta))
         myButton.pack()
 
 
@@ -58,7 +59,8 @@ def list_fonts(ime_teksta):
 
 
 #isto kao ovo prethodno samo je za velicinu a ne font
-def promena_velicine(velicina, ime_teksta, trenutni_font):
+def promena_velicine(velicina, ime_teksta):
+    trenutni_font = get_current_font_family(ime_teksta)
     ime_teksta.config(font=(trenutni_font, velicina))
 
 def toggle_sizes(ime_teksta):
@@ -79,9 +81,8 @@ def lista_velicina(ime_teksta):
     for widget in frame_size.winfo_children():
         widget.destroy()
 
-    font_family = get_current_font_family(ime_teksta)
     for i in range(1, 73):
-        myButton = Button(frame_size, text=str(i), command=lambda f=i: promena_velicine(f, ime_teksta, font_family))
+        myButton = Button(frame_size, text=str(i), command=lambda f=i: promena_velicine(f, ime_teksta))
         myButton.pack()
 
     # Pack the canvas and scrollbar after adding buttons
@@ -101,9 +102,10 @@ def get_current_font_size(ime_teksta):
 def get_current_font_family(ime_teksta):
     current_font = ime_teksta.cget("font")
     font_parts = current_font.split()
-    if len(font_parts) > 0:
-        font_family=font_parts[0]
+    if len(font_parts) > 1:
+        font_family =" ".join(font_parts[:-1])
         return font_family
+    return current_font
 
 
 
@@ -138,7 +140,7 @@ font_button.place(x=10, y=10)
 
 # dugme za velicine
 size_button = Button(root, text="Change Size", command=lambda: toggle_sizes(ime_teksta))
-size_button.place(x=710, y=10)  # Adjust the x position based on window width
+size_button.place(x=440, y=10)  # pozicija u falju
 
 root.mainloop()
 
