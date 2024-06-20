@@ -1,82 +1,66 @@
 import tkinter as tk
-from tkinter import *
+from tkinter import Canvas, Frame, Scrollbar, Label, Button
 from matplotlib import font_manager
 
-
 root = tk.Tk()
-root.geometry("800x600")
+root.geometry("200x600")
 
-#uzimanje vrednosti iz celije
-#row, col = self.selected_cell
-#val = self.variables[(row, col)].get()
-
-
-text=Label(root,text="mjau",font=("Arial",16))
+text = Label(root, text="mjau", font=("Arial", 16))
 text.pack()
-ime_teksta=text
+ime_teksta = text
 
-
-def change_font(ime_fonta,ime_teksta,trenutna_velicina):
-    
-    ime_teksta.config(font=(ime_fonta,trenutna_velicina))
+def change_font(ime_fonta, ime_teksta, trenutna_velicina):
+    ime_teksta.config(font=(ime_fonta, trenutna_velicina))
 
 def list_fonts(ime_teksta):
-    #Svi fontovi u bazi pythona
-    available_fonts = sorted([f.name for f in font_manager.fontManager.ttflist])
-
+    desired_fonts = {"Calibri", "Arial", "Times New Roman", "Cambria", "Algerian"}
+    available_fonts = sorted([f.name for f in font_manager.fontManager.ttflist if f.name in desired_fonts])
     
-    # ovo je napravljeno za scrolanje niz fontove
-    canvas = Canvas(root)
-    frame = Frame(canvas)
-    scrollbar = Scrollbar(root, orient="vertical", command=canvas.yview)
-    canvas.configure(yscrollcommand=scrollbar.set)
-    scrollbar.pack(side="right", fill="y")
-    canvas.pack(side="left", fill="both", expand=True)
-    canvas.create_window((0, 0), window=frame, anchor="nw")
-    frame.bind("<Configure>", lambda event, canvas=canvas: canvas.configure(scrollregion=canvas.bbox("all")))
-    for widget in frame.winfo_children():
+    # Frame for fonts
+    font_frame = Frame(root)
+    font_frame.pack(side="left", fill="both", expand=True)
+    
+    canvas_font = Canvas(font_frame)
+    frame_font = Frame(canvas_font)
+    scrollbar_font = Scrollbar(font_frame, orient="vertical", command=canvas_font.yview)
+    canvas_font.configure(yscrollcommand=scrollbar_font.set)
+    scrollbar_font.pack(side="right", fill="y")
+    canvas_font.pack(side="left", fill="both", expand=True)
+    canvas_font.create_window((0, 0), window=frame_font, anchor="nw")
+    frame_font.bind("<Configure>", lambda event, canvas=canvas_font: canvas.configure(scrollregion=canvas.bbox("all")))
+
+    for widget in frame_font.winfo_children():
         widget.destroy()
 
-    for font in available_fonts :
-        myButton = Button(frame, text=font, command=lambda f=font: change_font(f,ime_teksta,get_current_font_size(ime_teksta)))
+    font_size = get_current_font_size(ime_teksta)
+    for font in available_fonts:
+        myButton = Button(frame_font, text=font, command=lambda f=font: change_font(f, ime_teksta, font_size))
         myButton.pack()
 
-
-# dugme za otvaranje liste fontova
-font_button = Button(root, text="Change Fonts", command=lambda: list_fonts(ime_teksta))
-font_button.pack(pady=10)
-
-
-
-
-
-
-
-
-def promena_velicine(velicina,ime_teksta,trenutni_font):
-    
-    ime_teksta.config(font=(trenutni_font,velicina))
+def promena_velicine(velicina, ime_teksta, trenutni_font):
+    ime_teksta.config(font=(trenutni_font, velicina))
 
 def lista_velicina(ime_teksta):
-    # ovo je napravljeno za scrolanje niz fontove
-    canvas = Canvas(root)
-    frame = Frame(canvas)
-    scrollbar = Scrollbar(root, orient="vertical", command=canvas.yview)
-    canvas.configure(yscrollcommand=scrollbar.set)
-    scrollbar.pack(side="right", fill="y")
-    canvas.pack(side="left", fill="both", expand=True)
-    canvas.create_window((0, 0), window=frame, anchor="nw")
-    frame.bind("<Configure>", lambda event, canvas=canvas: canvas.configure(scrollregion=canvas.bbox("all")))
-    for widget in frame.winfo_children():
+    # Frame for sizes
+    size_frame = Frame(root)
+    size_frame.pack(side="right", fill="both", expand=True)
+    
+    canvas_size = Canvas(size_frame)
+    frame_size = Frame(canvas_size)
+    scrollbar_size = Scrollbar(size_frame, orient="vertical", command=canvas_size.yview)
+    canvas_size.configure(yscrollcommand=scrollbar_size.set)
+    scrollbar_size.pack(side="right", fill="y")
+    canvas_size.pack(side="left", fill="both", expand=True)
+    canvas_size.create_window((0, 0), window=frame_size, anchor="nw")
+    frame_size.bind("<Configure>", lambda event, canvas=canvas_size: canvas.configure(scrollregion=canvas.bbox("all")))
+
+    for widget in frame_size.winfo_children():
         widget.destroy()
 
-    for i in range(1,73):
-        myButton = Button(frame, text=i, command=lambda f=i: promena_velicine(f,ime_teksta,get_current_font_family(ime_teksta)))
+    font_family = get_current_font_family(ime_teksta)
+    for i in range(1, 73):
+        myButton = Button(frame_size, text=str(i), command=lambda f=i: promena_velicine(f, ime_teksta, font_family))
         myButton.pack()
-
-
-
-
 
 def get_current_font_size(ime_teksta):
     current_font = ime_teksta.cget("font")
@@ -92,13 +76,13 @@ def get_current_font_family(ime_teksta):
         font_family = font_parts[0]
         return font_family
 
-
-
-
-
-# dugme za otvaranje liste velicina
-font_button = Button(root, text="promena velicine", command=lambda: lista_velicina(ime_teksta))
+# Button to open the list of fonts
+font_button = Button(root, text="Change Fonts", command=lambda: list_fonts(ime_teksta))
 font_button.pack(pady=10)
+
+# Button to open the list of sizes
+size_button = Button(root, text="Change Size", command=lambda: lista_velicina(ime_teksta))
+size_button.pack(pady=10)
 
 root.mainloop()
 
