@@ -4,17 +4,26 @@ from matplotlib import font_manager
 
 
 root = tk.Tk()
-root.geometry("100x600")
+root.geometry("800x600")
 
-row, col = self.selected_cell
-val = self.variables[(row, col)].get()
-def change_font(ime_fonta,ime_teksta):
+#uzimanje vrednosti iz celije
+#row, col = self.selected_cell
+#val = self.variables[(row, col)].get()
+
+
+text=Label(root,text="mjau",font=("Arial",16))
+text.pack()
+ime_teksta=text
+
+
+def change_font(ime_fonta,ime_teksta,trenutna_velicina):
     
-    ime_teksta.config(font=(ime_fonta,16))
+    ime_teksta.config(font=(ime_fonta,trenutna_velicina))
 
 def list_fonts(ime_teksta):
     #Svi fontovi u bazi pythona
     available_fonts = sorted([f.name for f in font_manager.fontManager.ttflist])
+
     
     # ovo je napravljeno za scrolanje niz fontove
     canvas = Canvas(root)
@@ -25,18 +34,18 @@ def list_fonts(ime_teksta):
     canvas.pack(side="left", fill="both", expand=True)
     canvas.create_window((0, 0), window=frame, anchor="nw")
     frame.bind("<Configure>", lambda event, canvas=canvas: canvas.configure(scrollregion=canvas.bbox("all")))
+    for widget in frame.winfo_children():
+        widget.destroy()
 
-    for font in available_fonts:
-        myButton = Button(frame, text=font, command=lambda f=font: change_font(f,ime_teksta))
+    for font in available_fonts :
+        myButton = Button(frame, text=font, command=lambda f=font: change_font(f,ime_teksta,get_current_font_size(ime_teksta)))
         myButton.pack()
 
-ime_teksta=val
 
 # dugme za otvaranje liste fontova
 font_button = Button(root, text="Change Fonts", command=list_fonts(ime_teksta))
 font_button.pack(pady=10)
 
-root.mainloop()
 
 
 
@@ -44,11 +53,9 @@ root.mainloop()
 
 
 
-row, col = self.selected_cell
-val = self.variables[(row, col)].get()
-def promena_velicine(velicina,ime_teksta):
+def promena_velicine(velicina,ime_teksta,trenutni_font):
     
-    ime_teksta.config(font=("Arial",velicina))
+    ime_teksta.config(font=(trenutni_font,velicina))
 
 def lista_velicina(ime_teksta):
     # ovo je napravljeno za scrolanje niz fontove
@@ -60,13 +67,34 @@ def lista_velicina(ime_teksta):
     canvas.pack(side="left", fill="both", expand=True)
     canvas.create_window((0, 0), window=frame, anchor="nw")
     frame.bind("<Configure>", lambda event, canvas=canvas: canvas.configure(scrollregion=canvas.bbox("all")))
+    for widget in frame.winfo_children():
+        widget.destroy()
 
-    for i in range(1,72):
-        myButton = Button(frame, text=i, command=lambda f=i: promena_velicine(f,ime_teksta))
+    for i in range(1,73):
+        myButton = Button(frame, text=i, command=lambda f=i: promena_velicine(f,ime_teksta,get_current_font_family(ime_teksta)))
         myButton.pack()
 
-#ime_teksta se unosi pa se onda menja font
-ime_teksta=val
+
+
+
+
+def get_current_font_size(ime_teksta):
+    current_font = ime_teksta.cget("font")
+    font_parts = current_font.split()
+    if len(font_parts) > 1:
+        font_size = int(font_parts[-1])
+        return font_size
+
+def get_current_font_family(ime_teksta):
+    current_font = ime_teksta.cget("font")
+    font_parts = current_font.split()
+    if len(font_parts) > 0:
+        font_family = font_parts[0]
+        return font_family
+
+
+
+
 
 # dugme za otvaranje liste velicina
 font_button = Button(root, text="promena velicine", command=lista_velicina(ime_teksta))
