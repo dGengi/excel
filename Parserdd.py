@@ -102,7 +102,7 @@ def is_excel_cell_format(s):
 #d.generate_cell('A', 2, 11)
 #d.generate_cell('A', 3, 4)
 
-def transform_cells(tokens, L, keys):
+def transform_cells(tokens, L, keys, graph):
     i=0
     l = len(tokens)
     while i<l:
@@ -111,6 +111,8 @@ def transform_cells(tokens, L, keys):
             col = csti(col) - 1
             row -= 1
             value = str(keys[(row, col)])
+            if graph is not None and L[-1] not in graph[(row, col)]:
+                graph[(row, col)].append(L[-1])
             if len(value)>0 and value[0] == "=":
                 if (row, col) in L:
                     raise OverflowError()
@@ -136,7 +138,7 @@ def transform_cells(tokens, L, keys):
             
 
         i+=1
-    return tokens
+    return (tokens, graph)
 
 def transform_eq(tokens):
     for i in range(len(tokens)):
@@ -144,14 +146,14 @@ def transform_eq(tokens):
             tokens[i] = "=="
     return tokens
 
-def transform(tokens, L, keys):
+def transform(tokens, L, keys, graph):
     tokens = transform_intervals(tokens)
-    tokens = transform_cells(tokens, L, keys)
+    tokens, graph = transform_cells(tokens, L, keys, graph)
     tokens = transform_eq(tokens)
-    return tokens
+    return (tokens, graph)
 
-def izvrsi(tokens, L, keys):
-    tokens = transform(tokens, L, keys)
+def izvrsi(tokens, L, keys, graph):
+    tokens, graph = transform(tokens, L, keys, graph)
     tokens2 = []
     i = 0
     while i < len(tokens):
@@ -196,7 +198,7 @@ def izvrsi(tokens, L, keys):
                     j = zarez
                 j+=1
             print("l2 =", l2)
-            l3 = [izvrsi(token, L, keys) for token in l2]
+            l3 = [izvrsi(token, L, keys, None)[0] for token in l2]
             print("l3 =", l3)
             if f == "SUM":
                 tokens2.append(str(SUM(l3)))
@@ -231,7 +233,7 @@ def izvrsi(tokens, L, keys):
             tokens2.append(tokens[i])
         i += 1
     new_expression = "".join(tokens2)
-    return str(eval(new_expression))
+    return (str(eval(new_expression)), graph)
 
 #e0 = "3+SUM(1,2)"
 #e1 = "SUM(1,3*AVERAGE(3,2,1))"
@@ -245,11 +247,12 @@ def izvrsi(tokens, L, keys):
 #print(izvrsi(tokenize(e3)))
 #print(izvrsi(tokenize(e4)))
 
-def evaluate(formula: str, cell = None, keys = None):
-    value = eval(izvrsi(tokenize(formula), [cell], keys)) 
+def evaluate(formula: str, cell = None, keys = None, graph = None):
+    value, graph = izvrsi(tokenize(formula), [cell], keys, graph)
+    value = eval(value)
     if type(value)==float and round(value, 14) == round(value):
         value = round(value)
-    return value
+    return ( value, graph)
 
 
 #print(evaluate(e4, None))
