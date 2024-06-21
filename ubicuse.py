@@ -130,6 +130,7 @@ class SpreadsheetApp:
                 entry.bind("<Right>", self.on_right)
                 entry.bind("<Left>", self.on_left)
                 entry.bind("<KeyRelease>", self.update_text_box_content)
+                entry.bind("<Tab>", self.on_right)
                 
 
         self.deselect_all_cells()
@@ -152,29 +153,35 @@ class SpreadsheetApp:
 
         value = str(self.variables[(row, col)].get())
         
+        
         for rows in range(self.rows):
             for columns in range(self.columns):
                 if not (rows,columns) in self.keys and (rows,columns) in self.variables:
                     self.keys[(rows,columns)]=self.variables[(rows,columns)].get()
-                                  
-      
         
-        if self.selected_cell and value:
+        
+      
+        print(value)
+        if (row,col) and value:
             
             #print(value)
             if(value[0] == '='):
                 try:
                     self.keys[(row,col)]=self.variables[(row,col)].get()
-                    print(value)
+                  #  print(value)
                     self.variables[(row,col)].set(evaluate(value[1:],(row,col),self.keys))
-                    print(self.keys)
+                   # print(self.keys)
                     
                 except:
                     self.variables[(row,col)].set("#ERROR!")
             else:
                 if not self.keys[(row,col)]:
                     self.keys[(row,col)]=(self.variables[(row,col)].get())
-                    print(self.keys)
+                   # print(self.keys)
+                if self.keys[(row,col)] and self.keys[(row,col)][0]!='=':
+                    self.keys[(row,col)]=(self.variables[(row,col)].get())
+                    #print(self.keys)
+                    
         if event != None:
             self.on_return(None)
 
@@ -324,12 +331,22 @@ class SpreadsheetApp:
             with open(file_path, 'w', newline='') as file:
                 writer = csv.writer(file)
                 for r in range(self.rows):
-                    row = [self.variables[(r, c)].get() for c in range(self.columns)]
+                    row = [self.keys[(r, c)] for c in range(self.columns)]
                     writer.writerow(row)
             messagebox.showinfo("Save CSV", "CSV file saved successfully.")
 
+    def is_decimal(self,value):
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False
+        
     def save_bar_chart(self):
         selected_entries = []
+        
+        
+        
         for (row, col), entry in self.entries.items():
             if entry.cget("bg") == 'lightblue':
                 selected_entries.append((row, col))
@@ -341,6 +358,9 @@ class SpreadsheetApp:
         selected_cols = set(col for row, col in selected_entries)
         selected_rows = set(row for row, col in selected_entries)
         
+        col1, col2 = list(selected_cols)
+        print(col1)
+        
         if len(selected_cols) != 2:
             messagebox.showerror("Error", "Please select exactly two columns")
             return
@@ -350,8 +370,8 @@ class SpreadsheetApp:
         names = []
         values = []
         
-        col1_is_int = all(self.variables[(row, col1)].get().isdigit() for row in selected_rows if self.variables[(row, col1)].get())
-        col2_is_int = all(self.variables[(row, col2)].get().isdigit() for row in selected_rows if self.variables[(row, col2)].get())
+        col1_is_int = all(self.is_decimal(self.variables[(row, col1)].get()) for row in selected_rows if self.variables[(row, col1)].get())
+        col2_is_int = all(self.is_decimal(self.variables[(row, col2)].get()) for row in selected_rows if self.variables[(row, col2)].get())
         
         if not col1_is_int and not col2_is_int:
             messagebox.showerror("Error", "One of the selected columns must contain only integers")
@@ -363,21 +383,21 @@ class SpreadsheetApp:
                 value = self.variables[(row, col2)].get()
                 if name and value:
                     names.append(name)
-                    values.append(int(value))
+                    values.append(float(value))
         elif col1_is_int:
             for row in selected_rows:
                 value = self.variables[(row, col1)].get()
                 name = self.variables[(row, col2)].get()
                 if name and value:
                     names.append(name)
-                    values.append(int(value))
+                    values.append(float(value))
         else:
             for row in selected_rows:
                 name = self.variables[(row, col1)].get()
                 value = self.variables[(row, col2)].get()
                 if name and value:
                     names.append(name)
-                    values.append(int(value))
+                    values.append(float(value))
 
         plt.figure(figsize=(10, 6))
         plt.bar(names, values, color='blue')
@@ -396,6 +416,10 @@ class SpreadsheetApp:
     def clear_cells(self):
         for var in self.variables.values():
             var.set("")
+        for row in range(self.rows):
+            for col in range(self.columns):
+                self.keys[(row,col)]=''
+        print(self.keys)
         self.update_text_box_content(None)
         
 
