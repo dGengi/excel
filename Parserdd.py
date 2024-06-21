@@ -108,12 +108,11 @@ def transform_cells(tokens, L, keys):
             col, row = split_letter_number(tokens[i])
             col = csti(col) - 1
             row -= 1
-            value = str(keys[(row, col)].get())
+            value = str(keys[(row, col)])
             if len(value)>0 and value[0] == "=":
                 if (row, col) in L:
                     raise OverflowError()
-                L.append((row, col))
-                value = izvrsi(tokenize(value[1:]), L, keys)
+                value = izvrsi(tokenize(value[1:]), L+[(row,col)], keys)
             tokens[i] = value
     return tokens
 
@@ -145,7 +144,7 @@ def izvrsi(tokens, L, keys):
                         kraj = t
                         break
             l1 = tokens[(i+2):kraj]
-            #print("l1 =", l1)
+            print("l1 =", l1)
             l2 = []
             j = 0
             while j < len(l1):
@@ -174,9 +173,9 @@ def izvrsi(tokens, L, keys):
                     l2.append(l1[j:zarez])
                     j = zarez
                 j+=1
-            #print("l2 =", l2)
-            l3 = [izvrsi(token) for token in l2]
-            #print("l3 =", l3)
+            print("l2 =", l2)
+            l3 = [izvrsi(token, L, keys) for token in l2]
+            print("l3 =", l3)
             if f == "SUM":
                 tokens2.append(str(SUM(l3)))
             elif f == "AVERAGE":
