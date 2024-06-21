@@ -26,6 +26,7 @@ class SpreadsheetApp:
         self.cell_width=0
         self.upper_distance=0
         self.left_distance=0
+        
         if platform.system() == 'Windows':
             self.cell_height=20.86
             self.cell_width=76.3
@@ -175,12 +176,14 @@ class SpreadsheetApp:
                 except:
                     self.variables[(row,col)].set("#ERROR!")
             else:
-                if not self.keys[(row,col)]:
-                    self.keys[(row,col)]=(self.variables[(row,col)].get())
-                   # print(self.keys)
-                if self.keys[(row,col)] and self.keys[(row,col)][0]!='=':
-                    self.keys[(row,col)]=(self.variables[(row,col)].get())
-                    #print(self.keys)
+                if (row,col) != self.previous_cell:
+                    if not self.keys[(row,col)]:
+                        self.keys[(row,col)]=(self.variables[(row,col)].get())
+                    # print(self.keys)
+                    if self.keys[(row,col)] and self.keys[(row,col)][0]!='=':
+                        self.keys[(row,col)]=(self.variables[(row,col)].get())
+                        #print(self.keys)
+                
                     
         if event != None:
             self.on_return(None)
@@ -250,6 +253,8 @@ class SpreadsheetApp:
         return None, None
 
     def focus_cell(self, row, col):
+        if self.selected_cell:
+            self.previous_cell=self.selected_cell
         self.entries[(row, col)].focus_set()
         self.deselect_all_cells()
         self.entries[(row, col)].config(bg='lightblue', highlightbackground='black', highlightcolor='black', highlightthickness=1)
