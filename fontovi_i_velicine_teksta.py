@@ -114,11 +114,11 @@ size_frame.pack(side="right", fill="both", expand=True)
 
 # dugme za fontove
 font_button = Button(root, text="Change Fonts", command=lambda: toggle_fonts(ime_teksta))
-font_button.place(x=10, y=10)
+font_button.place(x=210, y=10)
 
 # dugme za velicine
 size_button = Button(root, text="Change Size", command=lambda: toggle_sizes(ime_teksta))
-size_button.place(x=440, y=10)
+size_button.place(x=540, y=10)
 
 root.mainloop()
 
