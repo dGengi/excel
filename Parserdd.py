@@ -3,7 +3,7 @@ from column_conversion import *
 from funkcije import *
 import re
 
-funkcije = ['SUM', 'AVERAGE', 'MAX', 'MIN', 'PRODUCT', 'IF', 'AND', 'OR', 'NOT', 'MEDIAN', 'COUNT']
+funkcije = ['SUM', 'AVERAGE', 'MAX', 'MIN', 'PRODUCT', 'IF', 'AND', 'OR', 'NOT', 'MEDIAN', 'COUNT', 'COUNTA', 'VAR', 'MODE']
 i = 0
 
 def transform_intervals(tokens : list) -> list:
@@ -220,6 +220,12 @@ def izvrsi(tokens, L, keys):
                 tokens2.append(str(MEDIAN(l3)))
             elif f == 'COUNT':
                 tokens2.append(str(COUNT(l3)))
+            elif f == 'COUNTA':
+                tokens2.append(str(COUNTA(l3)))
+            elif f == 'VAR':
+                tokens2.append(str(VAR(l3)))
+            elif f == 'MODE':
+                tokens2.append(str(MODE(l3)))
             i = kraj
         else:
             tokens2.append(tokens[i])
