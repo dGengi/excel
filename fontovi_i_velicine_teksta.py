@@ -6,7 +6,7 @@ root = tk.Tk()
 root.geometry("800x600")
 
 # probni tekst
-text = Label(root, text="mjau", font=("Arial", 16))
+text = Label(root, text="neki tekst", font=("Arial", 16))
 text.pack()
 ime_teksta = text
 
