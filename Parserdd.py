@@ -111,8 +111,14 @@ def transform_cells(tokens, L, keys, graph):
             col = csti(col) - 1
             row -= 1
             value = str(keys[(row, col)])
-            if graph is not None and L[-1] not in graph[(row, col)]:
-                graph[(row, col)].append(L[-1])
+            if graph is not None:
+                try:
+                    graph[(row,col)]
+                except KeyError:
+                    graph[(row,col)] = []
+                for cell in L:
+                    if cell not in graph[(row, col)]:
+                        graph[(row, col)].append(cell)
             if len(value)>0 and value[0] == "=":
                 if (row, col) in L:
                     raise OverflowError()
@@ -135,8 +141,6 @@ def transform_cells(tokens, L, keys, graph):
                         tokens.pop(i)
                         i-=1
                         l-=1
-            
-
         i+=1
     return (tokens, graph)
 
