@@ -103,7 +103,9 @@ def is_excel_cell_format(s):
 #d.generate_cell('A', 3, 4)
 
 def transform_cells(tokens, L, keys):
-    for i in range(len(tokens)):
+    i=0
+    l = len(tokens)
+    while i<l:
         if is_excel_cell_format(tokens[i]):
             col, row = split_letter_number(tokens[i])
             col = csti(col) - 1
@@ -113,7 +115,27 @@ def transform_cells(tokens, L, keys):
                 if (row, col) in L:
                     raise OverflowError()
                 value = izvrsi(tokenize(value[1:]), L+[(row,col)], keys)
+            
             tokens[i] = value
+            if value == '' and i != 0 and i != len(tokens) - 1:
+                if tokens[i-1] in "(," and tokens[i+1] in ",)":
+                    if tokens[i-1] == ',':
+                        tokens.pop(i-1)
+                        tokens.pop(i-1)
+                        i-=2
+                        l-=2
+                    elif tokens[i+1] == ',':
+                        tokens.pop(i)
+                        tokens.pop(i)
+                        i-=1
+                        l-=2
+                    else:
+                        tokens.pop(i)
+                        i-=1
+                        l-=1
+            
+
+        i+=1
     return tokens
 
 def transform_eq(tokens):
@@ -218,7 +240,10 @@ def izvrsi(tokens, L, keys):
 #print(izvrsi(tokenize(e4)))
 
 def evaluate(formula: str, cell = None, keys = None):
-    return izvrsi(tokenize(formula), [cell], keys)
+    value = eval(izvrsi(tokenize(formula), [cell], keys)) 
+    if type(value)==float and round(value, 14) == round(value):
+        value = round(value)
+    return value
 
 
 #print(evaluate(e4, None))
