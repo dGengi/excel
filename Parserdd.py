@@ -122,7 +122,7 @@ def transform_cells(tokens, L, keys, graph):
             if len(value)>0 and value[0] == "=":
                 if (row, col) in L:
                     raise OverflowError()
-                value = izvrsi(tokenize(value[1:]), L+[(row,col)], keys)
+                value = izvrsi(tokenize(value[1:]), L+[(row,col)], keys, graph)[0]
             
             tokens[i] = value
             if value == '' and i != 0 and i != len(tokens) - 1:
