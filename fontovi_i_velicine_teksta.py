@@ -4,26 +4,19 @@ from matplotlib import font_manager
 
 root = tk.Tk()
 root.geometry("800x600")
-#probni tekst
+
+# probni tekst
 text = Label(root, text="mjau", font=("Arial", 16))
 text.pack()
 ime_teksta = text
-
-
-#row, col = self.selected_cell
-#val = self.variables[(row, col)].get()
-#ime_teksta = val
-
 
 # da li je lista fontova ili velicina vidljiva
 font_list_visible = False
 size_list_visible = False
 
-
-
-#menjanje fontova
+# menjanje fontova
 def change_font(ime_fonta, ime_teksta):
-    trenutna_velicina=get_current_font_size(ime_teksta)
+    trenutna_velicina = get_current_font_size(ime_teksta)
     ime_teksta.config(font=(ime_fonta, trenutna_velicina))
 
 def toggle_fonts(ime_teksta):
@@ -38,27 +31,20 @@ def toggle_fonts(ime_teksta):
         list_fonts(ime_teksta)
         font_list_visible = True
 
-#pravi listu dugmica za svaki moguci font u pythonovoj biblioteci
+# pravi listu dugmica za svaki moguci font u pythonovoj biblioteci
 def list_fonts(ime_teksta):
-    t=1
-    available_fonts = sorted([f.name for f in font_manager.fontManager.ttflist ])
-    t=t+1
+    available_fonts = sorted([f.name for f in font_manager.fontManager.ttflist])
     for widget in frame_font.winfo_children():
         widget.destroy()
-
 
     for font in available_fonts:
         myButton = Button(frame_font, text=font, command=lambda f=font: change_font(f, ime_teksta))
         myButton.pack()
 
-
     canvas_font.pack(side="left", fill="both", expand=True)
     scrollbar_font.pack(side="right", fill="y")
 
-
-
-
-#isto kao ovo prethodno samo je za velicinu a ne font
+# isto kao ovo prethodno samo je za velicinu a ne font
 def promena_velicine(velicina, ime_teksta):
     trenutni_font = get_current_font_family(ime_teksta)
     ime_teksta.config(font=(trenutni_font, velicina))
@@ -87,11 +73,9 @@ def lista_velicina(ime_teksta):
 
     # Pack the canvas and scrollbar after adding buttons
     canvas_size.pack(side="left", fill="both", expand=True)
-    scrollbar_size.pack(side="top", fill="x")
+    scrollbar_size.pack(side="right", fill="y")
 
-
-
-# za dobijanje trenutnog fontaa ili velicine obelezenog teksta
+# za dobijanje trenutnog fonta ili velicine obelezenog teksta
 def get_current_font_size(ime_teksta):
     current_font = ime_teksta.cget("font")
     font_parts = current_font.split()
@@ -103,14 +87,9 @@ def get_current_font_family(ime_teksta):
     current_font = ime_teksta.cget("font")
     font_parts = current_font.split()
     if len(font_parts) > 1:
-        font_family =" ".join(font_parts[:-1])
+        font_family = " ".join(font_parts[:-1])
         return font_family
     return current_font
-
-
-
-
-
 
 # scroler za font
 font_frame = Frame(root)
@@ -130,7 +109,6 @@ canvas_size.configure(yscrollcommand=scrollbar_size.set)
 canvas_size.create_window((0, 0), window=frame_size, anchor="nw")
 frame_size.bind("<Configure>", lambda event, canvas=canvas_size: canvas.configure(scrollregion=canvas.bbox("all")))
 
-
 font_frame.pack(side="left", fill="both", expand=True)
 size_frame.pack(side="right", fill="both", expand=True)
 
@@ -140,7 +118,8 @@ font_button.place(x=10, y=10)
 
 # dugme za velicine
 size_button = Button(root, text="Change Size", command=lambda: toggle_sizes(ime_teksta))
-size_button.place(x=440, y=10)  # pozicija u falju
+size_button.place(x=440, y=10)
 
 root.mainloop()
+
 
